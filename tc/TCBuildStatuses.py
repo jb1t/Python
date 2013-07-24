@@ -10,13 +10,9 @@ overallStatus = "Success"
 for project in projects:
     projectName = project['@name']
     buildStatus = project['@lastBuildStatus']
-    if buildStatus != 'Success' and buildStatus != 'Unknown' and projectName.count(":: CI") > 0:
+    if buildStatus != 'Success' and buildStatus != 'Unknown' and projectName.count(":: Deploy") == 0:
         overallStatus = "Failure"
-        #print(projectName, buildStatus)
-        break
+        print(projectName, buildStatus)
+        #break
 
 print(overallStatus)
-    
-
-
-
