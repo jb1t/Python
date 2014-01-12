@@ -8,7 +8,7 @@ from lightPins import LightPins
 #import pymongo
 import datetime
 
-listen_addr = '192.168.1.17'
+listen_addr = '192.168.1.6'
 listen_port = '8088'
 lights = lightsDAO.LightsDAO()
 
