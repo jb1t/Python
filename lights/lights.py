@@ -26,6 +26,22 @@ def index():
     return bottle.template('lights.tpl')
 
 
+@bottle.route('/cycle')
+@bottle.route('/cycle/<count:int>')
+def cycle(count):
+    logger.write('cycle')
+    if count > 0:
+        loop_counter = count
+    else: 
+	loop_counter = 5
+    for i in range(loop_counter):
+	for key, value in LightPins.Pins.items():
+            lights.turn_on(LightPins.Pins[key])
+	    time.sleep(0.1)
+            lights.turn_off(LightPins.Pins[key])
+    return bottle.template('lights.tpl')
+
+
 @bottle.route('/blink')
 @bottle.route('/blink/<count:int>')
 def blink(count):
