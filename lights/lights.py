@@ -7,12 +7,13 @@ import lightsDAO
 from lightPins import LightPins
 from logger import MongoLogger
 import time
+from bson import json_util
+import json
 
-listen_addr = '192.168.1.6'
+listen_addr = '192.168.1.100'
 listen_port = '8088'
 lights = lightsDAO.LightsDAO()
 logger = MongoLogger("localhost", 27017)
-
 
 def signal_handler(signal, frame):
     lights = None
@@ -27,8 +28,8 @@ def index():
 
 
 @bottle.route('/cycle')
-@bottle.route('/cycle/<count:int>')
-def cycle(count):
+@bottle.route('/cycle/<count:int>/<onDuration:float>/<offDuration:float>')
+def cycle(count, onDuration, offDuration):
     logger.write('cycle')
     if count > 0:
         loop_counter = count
@@ -37,14 +38,15 @@ def cycle(count):
     for i in range(loop_counter):
 	for key, value in LightPins.Pins.items():
             lights.turn_on(LightPins.Pins[key])
-	    time.sleep(0.1)
+	    time.sleep(onDuration)
             lights.turn_off(LightPins.Pins[key])
-    return bottle.template('lights.tpl')
+	    time.sleep(offDuration)
+    return 
 
 
 @bottle.route('/blink')
-@bottle.route('/blink/<count:int>')
-def blink(count):
+@bottle.route('/blink/<count:int>/<onDuration:float>/<offDuration:float>')
+def blink(count, onDuration, offDuration):
     logger.write('blink')
     if count > 0:
         loop_counter = count
@@ -52,38 +54,39 @@ def blink(count):
 	loop_counter = 5
     for i in range(loop_counter):
         lights.turn_all_on()
-        time.sleep(0.5)
+        time.sleep(onDuration)
         lights.turn_all_off()
-	time.sleep(0.5)
-    return bottle.template('lights.tpl')
+	time.sleep(offDuration)
+    return 
 
 
 @bottle.route('/red')
 def red():
     logger.write('red')
     lights.turn_on(LightPins.Pins['RED'])
-    return bottle.template('lights.tpl')
+    return 
 
 
 @bottle.route('/yellow')
 def yellow():
     logger.write('yellow')
     lights.turn_on(LightPins.Pins['YELLOW'])
-    return bottle.template('lights.tpl')
+    return 
 
 
 @bottle.route('/green')
 def green():
-    logger.write('green')
+    brequest = {'url': bottle.request.url, 'ip': bottle.request.remote_addr, 'something': bottle.request.json}
+    logger.write(brequest)
     lights.turn_on(LightPins.Pins['GREEN'])
-    return bottle.template('lights.tpl')
+    return 
 
 
 @bottle.route('/off')
 def lights_off():
     logger.write('off')
     lights.turn_all_off()
-    return bottle.template('lights.tpl')
+    return 
 
 
 @error(404)
