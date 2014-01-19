@@ -3,17 +3,18 @@ import signal
 import sys
 import bottle
 from bottle import error
-import lightsDAO
+import piLightsDAO
+#import consoleLightsDAO
 from lightPins import LightPins
 from logger import MongoLogger
-import time
-from bson import json_util
-import json
 
-listen_addr = '192.168.1.100'
+#listen_addr = '192.168.1.100'
+listen_addr = '0.0.0.0'
 listen_port = '8088'
-lights = lightsDAO.LightsDAO()
+lights = piLightsDAO.PiLightsDAO()
+#lights = consoleLightsDAO.ConsoleLightsDAO()
 logger = MongoLogger("localhost", 27017)
+
 
 def signal_handler(signal, frame):
     lights = None
@@ -23,75 +24,57 @@ def signal_handler(signal, frame):
 
 @bottle.route('/')
 def index():
-    logger.write('index()')
+    logger.write('index()', bottle.request)
     return bottle.template('lights.tpl')
 
 
 @bottle.route('/cycle')
-@bottle.route('/cycle/<count:int>/<onDuration:float>/<offDuration:float>')
-def cycle(count, onDuration, offDuration):
-    logger.write('cycle')
-    if count > 0:
-        loop_counter = count
-    else: 
-	loop_counter = 5
-    for i in range(loop_counter):
-	for key, value in LightPins.Pins.items():
-            lights.turn_on(LightPins.Pins[key])
-	    time.sleep(onDuration)
-            lights.turn_off(LightPins.Pins[key])
-	    time.sleep(offDuration)
-    return 
+@bottle.route('/cycle/<count:int>/<on_duration:float>/<off_duration:float>')
+def cycle(count, on_duration, off_duration):
+    logger.write('cycle', bottle.request)
+    lights.cycle_all_lights(off_duration, on_duration, count)
+    return
 
 
 @bottle.route('/blink')
-@bottle.route('/blink/<count:int>/<onDuration:float>/<offDuration:float>')
-def blink(count, onDuration, offDuration):
-    logger.write('blink')
-    if count > 0:
-        loop_counter = count
-    else: 
-	loop_counter = 5
-    for i in range(loop_counter):
-        lights.turn_all_on()
-        time.sleep(onDuration)
-        lights.turn_all_off()
-	time.sleep(offDuration)
-    return 
+@bottle.route('/blink/<count:int>/<on_duration:float>/<off_duration:float>')
+def blink(count, on_duration, off_duration):
+    logger.write('blink', bottle.request)
+    lights.blink_all_lights(count, off_duration, on_duration)
+    return
 
 
 @bottle.route('/red')
 def red():
-    logger.write('red')
+    logger.write('red', bottle.request)
     lights.turn_on(LightPins.Pins['RED'])
-    return 
+    return
 
 
 @bottle.route('/yellow')
 def yellow():
-    logger.write('yellow')
+    logger.write('yellow', bottle.request)
     lights.turn_on(LightPins.Pins['YELLOW'])
-    return 
+    return
 
 
 @bottle.route('/green')
 def green():
-    brequest = {'url': bottle.request.url, 'ip': bottle.request.remote_addr, 'something': bottle.request.json}
-    logger.write(brequest)
+    logger.write('green', bottle.request)
     lights.turn_on(LightPins.Pins['GREEN'])
-    return 
+    return
 
 
 @bottle.route('/off')
 def lights_off():
-    logger.write('off')
+    logger.write('off', bottle.request)
     lights.turn_all_off()
-    return 
+    return
 
 
 @error(404)
 def mistake404(code):
-    logger.write('404 ' + bottle.request.url)
+    logger.write('404 ', bottle.request)
     return 'Sorry, this page does not exist!'
 
 

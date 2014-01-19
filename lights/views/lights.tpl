@@ -56,7 +56,10 @@
 
     $( "button" ).click(function(){
       var buttonId = $(this).attr("id");
-      var url = "/" + buttonId + "/" + repeatValue + "/" + onDuration + "/" + offDuration;
+      if(buttonId == "cycle" || buttonId == "blink")
+        var url = "/" + buttonId + "/" + repeatValue + "/" + onDuration + "/" + offDuration;
+      else
+        var url = "/" + buttonId;
       jQuery.ajax(url);
     });
 
