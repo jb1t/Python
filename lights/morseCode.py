@@ -1,9 +1,12 @@
 import time
+import consoleLightsDAO
 
 __author__ = 'jeffgarrison'
 
+lights = consoleLightsDAO.ConsoleLightsDAO()
 
-class MorseCode():
+
+class MorseCode:
 
     def __init__(self):
         self.unit = 0.5
@@ -54,10 +57,27 @@ class MorseCode():
             '9': [self.dash, self.dash, self.dash, self.dash, self.dot]
         }
 
-    def decode(self, text):
-        upper_text = text.uppercase()
+    def encode(self, text):
+        upper_text = text.upper()
+        encoded_string = ""
         for letter in upper_text:
-            for code in self.alphabet[letter]:
-                print code + " "
+            if letter == ' ':
+                encoded_string += '    '
+            else:
+                for code in self.alphabet[letter]:
+                    encoded_string += code + " "
+                encoded_string += "  "
+        return encoded_string.strip()
 
-
+    def blinkLEDs(self, encode_string):
+        for code in encode_string:
+            if code == '.':
+                lights.turn_all_on()
+                time.sleep(self.dot_time)
+                lights.turn_all_off()
+            elif code == '-':
+                lights.turn_all_on()
+                time.sleep(self.dash_time)
+                lights.turn_all_off()
+            elif code == ' ':
+                time.sleep(self.unit)
