@@ -2,7 +2,7 @@
 import signal
 import sys
 import bottle
-from bottle import error
+from bottle import error, static_file
 import piLightsDAO
 #import consoleLightsDAO
 from lightPins import LightPins
@@ -21,6 +21,9 @@ def signal_handler(signal, frame):
     print 'You pressed Ctrl+C!'
     sys.exit(0)
 
+@bottle.route('/static/<filepath:path>')
+def server_static(filepath):
+    return static_file(filepath, root="./")
 
 @bottle.route('/')
 def index():
