@@ -18,11 +18,11 @@
 <div class="container">
     <div class="jumbotron">
         <div>Repeat Count: <span id="repeatCount"></span></div>
-        <input style="width: 100%" type="range" id="repeatSlider" min="1" max="50" step="1" value="5">
+        <input id="repeatSlider" class="form-control" type="range" min="1" max="50" step="1" value="5">
         <div>Light On Duration: <span id="lightOnDuration"></span></div>
-        <input style="width: 100%" type="range" id="lightOnSlider" min="0.01" max="1" step="0.01" value="0.25">
+        <input id="lightOnSlider" class="form-control" type="range" min="0.01" max="1" step="0.01" value="0.25">
         <div>Light Off Duration: <span id="lightOffDuration"></span></div>
-        <input style="width: 100%" type="range" id="lightOffSlider" min="0.01" max="1" step="0.01" value="0.25">
+        <input id="lightOffSlider" class="form-control" type="range" min="0.01" max="1" step="0.01" value="0.25">
         <br/>
         <p>
             <a class="btn btn-lg btn-info btn-block" href="#" role="button" id="cycle">Cycle</a>
