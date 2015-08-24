@@ -1,85 +1,36 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>LEDs lights</title>
-  <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
-  <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
-  <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-  <link rel="stylesheet" href="/resources/demos/style.css">
-  <script>
-  $(function() {
-    var repeatValue = 1;
-    var offDuration = 0.25;
-    var onDuration = 0.25;
+  <head>
+    <title>Morse Code with LED Lights</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Bootstrap -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
 
-    if(navigator.userAgent.match(/Android/i)){
-      window.scrollTo(0,1);
-    }
-
-    $( "#repeatSlider" ).slider({
-	max: 50,
-	min: 1,
-	change: function(event, ui) {
-	  repeatValue = ui.value;
-	  $("#cycle").attr("href", "/cycle/" + repeatValue);
-	  $("#blink").attr("href", "/blink/" + repeatValue);
-	},
-	slide: function(event, ui) {
-	  $("#repeatCount").html(ui.value);
-	}
-    });
-
-    $( "#lightOnSlider" ).slider({
-	max: 1,
-	min: 0.01,
-	step: 0.01,
-	change: function(event, ui) {
-	  onDuration = ui.value;
-	},
-	slide: function(event, ui) {
-	  $("#lightOnDuration").html(ui.value);
-	}
-    });
-
-    $( "#lightOffSlider" ).slider({
-	max: 1,
-	min: 0.01,
-	step: 0.01,
-	change: function(event, ui) {
-	  offDuration = ui.value;
-	},
-	slide: function(event, ui) {
-	  $("#lightOffDuration").html(ui.value);
-	}
-    });
-
-    $( "button" ).click(function(){
-      var buttonId = $(this).attr("id");
-      if(buttonId == "cycle" || buttonId == "blink")
-        var url = "/" + buttonId + "/" + repeatValue + "/" + onDuration + "/" + offDuration;
-      else
-        var url = "/" + buttonId;
-      jQuery.ajax(url);
-    });
-
-});
-  </script>
-</head>
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+      <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
+    <![endif]-->
+  </head>
 <body>
 
-<div>Repeat Count:<span id="repeatCount"></span></div>
-<div id="repeatSlider"></div>
-<div>Light On Duration:<span id="lightOnDuration"></span></div>
-<div id="lightOnSlider"></div>
-<div>Light Off Duration:<span id="lightOffDuration"></span></div>
-<div id="lightOffSlider"></div>
-<button type="button" id="cycle">cycle</button>
-<button type="button" id="blink">blink</button>
-<button type="button" id="red">red</button>
-<button type="button" id="yellow">yellow</button>
-<button type="button" id="green">green</button>
-<button type="button" id="off">off</button>
+<div class="container">
+    <div class="jumbotron">
+        <form role="form" action="/mc" method="POST">
+            <div class="form-group">
+                <label for="message">Type your message: </label>
+                <textarea id="message" name="message" class="form-control" pattern="[A-Za-z0-9]*" rows="3">{{message}}</textarea>
+                <div id="morse-code">{{encoded_message}}</div>
+            </div>
+            <button type="submit" class="btn btn-default btn-primary">Submit</button>
+        </form>
+     </div>
+</div>
 
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="static/js/bootstrap.min.js"></script>
 </body>
 </html>
