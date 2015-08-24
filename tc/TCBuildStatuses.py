@@ -5,7 +5,7 @@ import RPi.GPIO as GPIO
 import time
 from datetime import datetime
 
-tc_url = "http://servernamegoeshere:90/httpAuth/app/rest/cctray/projects.xml"
+tc_url = "http://servername:90/httpAuth/app/rest/cctray/projects.xml"
 
 greenPin = 7
 yellowPin = 11
@@ -39,10 +39,10 @@ def getTCProjectsXML():
 def displayTime():
 	now = datetime.now()
 	today8am = now.replace(hour=8, minute=0, second=0, microsecond=0)
-	today5pm = now.replace(hour=23, minute=59, second=59, microsecond=0)
+	today5pm = now.replace(hour=17, minute=0, second=0, microsecond=0)
 
-	isDisplayTime = now > today8am and now < today5pm
-	print 'now=', now, 'today8am=', today8am, 'today5pm', today5pm, isDisplayTime
+	isDisplayTime = now > today8am and now < today5pm and now.weekday() >= 0 and now.weekday() < 5
+	print 'now=', now, 'today8am=', today8am, 'today5pm', today5pm, isDisplayTime, 'weekday()=', now.weekday(), ' where Monday=0, Sunday=6'
 
 	return isDisplayTime
 
