@@ -4,6 +4,7 @@ import sys
 import RPi.GPIO as GPIO
 import time
 from datetime import datetime
+from WEHolidays import WEHolidays
 
 tc_url = "http://servername:90/httpAuth/app/rest/cctray/projects.xml"
 
@@ -41,14 +42,14 @@ def displayTime():
 	today8am = now.replace(hour=8, minute=0, second=0, microsecond=0)
 	today5pm = now.replace(hour=17, minute=0, second=0, microsecond=0)
 
-	isDisplayTime = now > today8am and now < today5pm and now.weekday() >= 0 and now.weekday() < 5
-	print 'now=', now, 'today8am=', today8am, 'today5pm', today5pm, isDisplayTime, 'weekday()=', now.weekday(), ' where Monday=0, Sunday=6'
+	isDisplayTime = now > today8am and now < today5pm and now.weekday() >= 0 and now.weekday() < 5 and not weholidays.isHoliday(now)
+	print 'now=', now, 'today8am=', today8am, 'today5pm', today5pm, 'weekday()=', now.weekday(), ' where Monday=0, Sunday=6', 'isHoliday=', weholidays.isHoliday(now), 'isDisplayTime=', isDisplayTime
 
 	return isDisplayTime
 
 def main():
 	isDisplayTime = False
-
+	weholidays = WEHolidays()
 	setupGPIO()
 
 	while 1:
@@ -67,14 +68,14 @@ def main():
 				overallStatus = "Success"
 	
 				for project in projects:
-    					projectName = project['@name']
-	    				buildStatus = project['@lastBuildStatus']
+					projectName = project['@name']
+					buildStatus = project['@lastBuildStatus']
 					activity = project['@activity']
 
-    					if buildStatus != 'Success' and buildStatus != 'Unknown' and activity != 'Paused' and projectName.count(":: Deploy") == 0:
-	        				print(projectName, buildStatus)
-	        				overallStatus = buildStatus 
-			        		#break
+					if buildStatus != 'Success' and buildStatus != 'Unknown' and activity != 'Paused' and projectName.count(":: Deploy") == 0:
+						print(projectName, buildStatus)
+						overallStatus = buildStatus 
+						#break
 
 				print overallStatus, datetime.now()
 				clearPins()
