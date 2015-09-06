@@ -11,12 +11,12 @@ class Test_TeamCityProvider(unittest.TestCase):
     def test_getTeamCityProjects_WhenProjects_ReturnedValidated(self):
         # Setup
         mockRequests = Mock()
-        response = type('Dummy', (object,), {"text": """
+        response = """
             <Projects>
-                <Project name='testproject1' lastBuildStatus='Success' activity='NotPaused' />
-                <Project name='testproject2' lastBuildStatus='Failed' activity='Paused' />
+                <Project name='testproject1' lastBuildStatus='Success' activity='Sleeping' />
+                <Project name='testproject2' lastBuildStatus='Failure' activity='Paused' />
             </Projects>
-            """})
+            """
         mockRequests.get.return_value = response
         tc = TeamCityProvider(mockRequests, 'username', 'password')
 
@@ -24,16 +24,16 @@ class Test_TeamCityProvider(unittest.TestCase):
         projects = tc.getTeamCityProjects()
 
         # Assert
-        project1 = filter(lambda x: x.name == 'Coverage Router :: CI', projects)[0]
-        project2 = filter(lambda x: x.name == 'Coverage TextAnalyzer :: CI', projects)[0]
+        project1 = filter(lambda x: x.name == 'testproject1', projects)[0]
+        project2 = filter(lambda x: x.name == 'testproject2', projects)[0]
 
-        self.assertEqual(107, len(projects))
-        self.assertEqual('Coverage Router :: CI', project1.name)
+        self.assertEqual(2, len(projects))
+        self.assertEqual('testproject1', project1.name)
         self.assertEqual('Success', project1.status)
         self.assertEqual('Sleeping', project1.activity)
-        self.assertEqual('Coverage TextAnalyzer :: CI', project2.name)
+        self.assertEqual('testproject2', project2.name)
         self.assertEqual('Failure', project2.status)
-        self.assertEqual('Sleeping', project2.activity)
+        self.assertEqual('Paused', project2.activity)
 
 
 if __name__ == '__main__':
