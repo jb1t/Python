@@ -21,7 +21,7 @@ class TeamCityProvider:
         config.read('app.cfg')
         self.uselocalfile = config.getboolean('TeamCity', 'uselocalfile')
         self.localfile = config.get('TeamCity', 'localfile')
-        self.url = config.get('TeamCity', 'url')
+        self.tc_url = config.get('TeamCity', 'url')
 
     def getTeamCityProjects(self):
         response = self.getprojectxml()

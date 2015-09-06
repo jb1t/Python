@@ -19,7 +19,7 @@ class TimeValidator:
     def IsDisplayTime(self):
         now = self.datetime.now()
 
-        return True #self.IsWorkHours() and self.IsWorkWeekDay() and not self.weholidays.isHoliday(now)
+        return self.IsWorkHours() and self.IsWorkWeekDay() and not self.weholidays.isHoliday(now)
 
     def DisplayInfo(self):
         now = self.datetime.now()
