@@ -1,6 +1,4 @@
 import xmltodict
-import ConfigParser
-import io
 
 
 class Project:
@@ -9,19 +7,11 @@ class Project:
 
 
 class TeamCityProvider:
-    def __init__(self, requests, username, password):
-        self.getconfiguration()
-
+    def __init__(self, requests, appConfig, username, password):
         self.requests = requests
         self.username = username
         self.password = password
-
-    def getconfiguration(self):
-        config = ConfigParser.ConfigParser()
-        config.read('app.cfg')
-        self.uselocalfile = config.getboolean('TeamCity', 'uselocalfile')
-        self.localfile = config.get('TeamCity', 'localfile')
-        self.tc_url = config.get('TeamCity', 'url')
+        self.config = appConfig
 
     def getTeamCityProjects(self):
         response = self.getprojectxml()
@@ -39,9 +29,9 @@ class TeamCityProvider:
         return projects
 
     def getprojectxml(self):
-        if self.uselocalfile:
-            with open(self.localfile, "r") as myfile:
+        if self.config.getUseLocalFile():
+            with open(self.config.getLocalFile(), "r") as myfile:
                 response = myfile.read().replace('\n', '')
         else:
-            response = self.requests.get(self.tc_url, timeout=10.000, auth=(self.username, self.password))
+            response = self.requests.get(self.config.getTeamCityUrl(), timeout=10.000, auth=(self.username, self.password))
         return response
