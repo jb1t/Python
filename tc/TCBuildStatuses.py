@@ -6,12 +6,13 @@ from LightProvider import LightProvider
 from TeamCityProvider import TeamCityProvider
 from TimeValidator import TimeValidator
 import requests
+from AppConfig import AppConfig
+
 try:
     import RPi.GPIO as GPIO
 except ImportError:
     from rpidevmocks import MockGPIO
     GPIO = MockGPIO()
-
 
 class TCBuildLights:
     def __init__(self, lights, teamCity, timevalidator):
@@ -66,12 +67,12 @@ class TCBuildLights:
             except:
                 print 'Unhandled error occurred: ', sys.exc_info()[0]
 
-
 if __name__ == '__main__':
     try:
 
+        appConfig = AppConfig()
         lights = LightProvider(GPIO)
-        tc = TeamCityProvider(requests, 'jgarrison', 'password')
+        tc = TeamCityProvider(requests, appConfig, 'jgarrison', 'password')
         tv = TimeValidator(datetime, WEHolidays())
         buildLights = TCBuildLights(lights, tc, tv)
 
