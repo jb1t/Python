@@ -1,94 +1,86 @@
-import requests
-import xmltodict
 import sys
-import RPi.GPIO as GPIO
 import time
 from datetime import datetime
+from WEHolidays import WEHolidays
+from LightProvider import LightProvider
+from TeamCityProvider import TeamCityProvider
+from TimeValidator import TimeValidator
+import requests
+from AppConfig import AppConfig
 
-tc_url = "http://servernamegoeshere:90/httpAuth/app/rest/cctray/projects.xml"
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    from rpidevmocks import MockGPIO
+    GPIO = MockGPIO()
 
-greenPin = 7
-yellowPin = 11
-redPin = 12
+class TCBuildLights:
+    def __init__(self, lights, teamCity, timevalidator):
+        self.lights = lights
+        self.teamCity = teamCity
+        self.timevalidator = timevalidator
+        self.isDisplayTime = False
 
-def clearPins():
-	GPIO.output(greenPin, GPIO.LOW)
-	GPIO.output(yellowPin, GPIO.LOW)
-	GPIO.output(redPin, GPIO.LOW)
+    def getStatusToDisplay(self):
 
-def setupGPIO():
-	GPIO.setmode(GPIO.BOARD)
-	GPIO.setup(greenPin, GPIO.OUT)
-	GPIO.setup(yellowPin, GPIO.OUT)
-	GPIO.setup(redPin, GPIO.OUT)
-	clearPins()
+        projects = self.teamCity.getTeamCityProjects()
+        overallStatus = 'Success'
 
-def lightPin(status):
-	if status == 'Failure':
-		GPIO.output(redPin, GPIO.HIGH)
-	elif status == 'Success':
-		GPIO.output(greenPin, GPIO.HIGH)
-	else:
-		GPIO.output(yellowPin, GPIO.HIGH)
+        for project in projects:
+            if (
+                project.status != 'Success' and
+                project.status != 'Unknown' and
+                project.activity != 'Paused' and
+                project.name.count(":: Deploy") == 0
+            ):
+                overallStatus = project.status
+                break
 
-def getTCProjectsXML():
-	response = requests.get(tc_url, timeout=10.000, auth=('username', 'password'))
-	doc = xmltodict.parse(response.text)
-	return doc['Projects']['Project']
+        return overallStatus
 
-def displayTime():
-	now = datetime.now()
-	today8am = now.replace(hour=8, minute=0, second=0, microsecond=0)
-	today5pm = now.replace(hour=23, minute=59, second=59, microsecond=0)
+    def getPinToLightUp(self, status):
+        if status == 'Failure':
+            return LightProvider.RED_PIN()
+        elif status == 'Success':
+            return LightProvider.GREEN_PIN()
+        else:
+            return LightProvider.YELLOW_PIN()
 
-	isDisplayTime = now > today8am and now < today5pm
-	print 'now=', now, 'today8am=', today8am, 'today5pm', today5pm, isDisplayTime
+    def main(self):
 
-	return isDisplayTime
+        oldIsDisplayTime = self.isDisplayTime
+        self.isDisplayTime = self.timevalidator.IsDisplayTime()
+        if self.isDisplayTime <> oldIsDisplayTime:
+            if self.isDisplayTime:
+                self.lights.setupGPIO()
+            else:
+                self.lights.clearPins()
+                self.lights.cleanup()
 
-def main():
-	isDisplayTime = False
+        if self.isDisplayTime:
+            try:
+                status = self.getStatusToDisplay()
+                self.lights.clearPins()
+                self.lights.lightPin(self.getPinToLightUp(status))
+            except KeyboardInterrupt:
+                self.lights.cleanup()
+            except:
+                print 'Unhandled error occurred: ', sys.exc_info()[0]
 
-	setupGPIO()
+if __name__ == '__main__':
+    try:
 
-	while 1:
-		oldIsDisplayTime = isDisplayTime
-		isDisplayTime = displayTime()
-		if isDisplayTime <> oldIsDisplayTime:
-			if isDisplayTime:
-				setupGPIO()
-			else:
-				clearPins()
-				GPIO.cleanup()
-		
-		if isDisplayTime:
-			try:
-				projects = getTCProjectsXML()	
-				overallStatus = "Success"
-	
-				for project in projects:
-    					projectName = project['@name']
-	    				buildStatus = project['@lastBuildStatus']
-					activity = project['@activity']
+        appConfig = AppConfig()
+        lights = LightProvider(GPIO)
+        tc = TeamCityProvider(requests, appConfig, 'jgarrison', 'password')
+        tv = TimeValidator(datetime, WEHolidays())
+        buildLights = TCBuildLights(lights, tc, tv)
 
-    					if buildStatus != 'Success' and buildStatus != 'Unknown' and activity != 'Paused' and projectName.count(":: Deploy") == 0:
-	        				print(projectName, buildStatus)
-	        				overallStatus = buildStatus 
-			        		#break
+        lights.setupGPIO()
 
-				print overallStatus, datetime.now()
-				clearPins()
-				lightPin(overallStatus)
-			except KeyboardInterrupt:
-				GPIO.cleanup()
-			except:
-				print "Unhandled error occurred: ", sys.exc_info()[0]
-		
-		time.sleep(2)
+        while 1:
+            buildLights.main()
+            time.sleep(5)
 
-
-if __name__ == "__main__":
-	try:
-		main()
-	except KeyboardInterrupt:
-		GPIO.cleanup()
+    except KeyboardInterrupt:
+        lights.cleanup()

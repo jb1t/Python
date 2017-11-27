@@ -52,6 +52,19 @@ class PiLightsDAO:
             self.turn_all_off()
             time.sleep(off_duration)
 
+    def morse_code(self, encoded_text):
+        for character in encoded_text:
+            if character == '.':
+                self.turn_all_on()
+                time.sleep(0.5)
+                self.turn_all_off()
+            elif character == '-':
+                self.turn_all_on()
+                time.sleep(1.5)
+                self.turn_all_off()
+            elif character == ' ':
+                time.sleep(0.5)
+
     @staticmethod
     def turn_all_off():
         for key, value in lightPins.LightPins.Pins.items():

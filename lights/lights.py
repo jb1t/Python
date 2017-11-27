@@ -2,11 +2,13 @@
 import signal
 import sys
 import bottle
-from bottle import error, static_file
+from bottle import error, static_file, request
 import piLightsDAO
 #import consoleLightsDAO
 from lightPins import LightPins
 from logger import MongoLogger
+import morseCode
+
 
 #listen_addr = '192.168.1.100'
 listen_addr = '0.0.0.0'
@@ -73,6 +75,18 @@ def lights_off():
     logger.write('off', bottle.request)
     lights.turn_all_off()
     return
+
+@bottle.route('/mc')
+def morse_code():
+    return bottle.template('morse_code.tpl', message='', encoded_message='')
+
+@bottle.route('/mc', method='POST')
+def morse_code():
+    message = request.forms.get('message')
+    morse_code_instance = morseCode.MorseCode()
+    encoded_message = morse_code_instance.encode(message)
+    lights.morse_code(encoded_message)
+    return bottle.template('morse_code.tpl', message=message, encoded_message=encoded_message)
 
 
 @error(404)
