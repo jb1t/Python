@@ -1,6 +1,5 @@
 import ConfigParser
 
-
 class AppConfig:
     SETTINGS_KEY = 'Settings'
 
@@ -17,9 +16,10 @@ class AppConfig:
         self.IFTTT = IFTTT(config)
         self.Settings = Settings(config)
 
-        self.EmailSettings.get_configuration()
-        self.IFTTT.get_configuration()
-        self.Settings.get_configuration()
+        configurations = [self.EmailSettings, self.IFTTT, self.Settings]
+
+        for c in configurations:
+            c.get_configuration()
 
 
 class EmailSettings:

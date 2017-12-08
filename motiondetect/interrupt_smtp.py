@@ -1,24 +1,19 @@
-import RPi.GPIO as GPIO
 import time
 import datetime
 import smtplib
 import getpass
 import requests
 from AppConfig import AppConfig
-
-
-appSettings = AppConfig()
-appSettings.get_configuration()
-
-start_time = time.time()
-GPIO.setmode(GPIO.BOARD)
-PIR_PIN = appSettings.Settings.pirPin
-GPIO.setup(PIR_PIN, GPIO.IN)
-last_status = 'start_motion'
+try:
+    import RPi.GPIO as GPIO
+except ImportError:
+    from rpidevmocks import MockGPIO
+    GPIO = MockGPIO()
 
 
 def send_text():
     global password, appSettings
+
     from_address = appSettings.EmailSettings.fromEmail
     toaddrs = appSettings.EmailSettings.toAddress
     msg = "\r\n".join([
@@ -47,7 +42,10 @@ def send_ifttt():
 def motion_detected(pin):
     global start_time, last_status, appSettings
 
+    GPIO.remove_event_detect(pin)
+
     if GPIO.input(pin):
+
         print "Motion Detected @ " + str(datetime.datetime.now())
         elapsed_time = time.time() - start_time
         if elapsed_time > appSettings.Settings.elapsedTime:
@@ -61,21 +59,33 @@ def motion_detected(pin):
             print "Motion Stopped @ " + str(datetime.datetime.now())
             start_time = time.time()
 
-
-password = getpass.getpass()
-send_text()
-send_ifttt()
-print "PIR Module Test (CTRL+C to exit)"
-time.sleep(2)
-print "Ready"
+    GPIO.add_event_detect(pin, GPIO.RISING, callback=motion_detected, bouncetime=200)
 
 
-try:
+if __name__ == '__main__':
+    try:
 
-    GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=motion_detected)
-    while 1:
-        time.sleep(appSettings.Settings.mainThreadSleep)
+        appSettings = AppConfig()
+        appSettings.get_configuration()
 
-except KeyboardInterrupt:
-    print "Quit"
-    GPIO.cleanup()
+        start_time = time.time()
+        GPIO.setmode(GPIO.BOARD)
+        PIR_PIN = appSettings.Settings.pirPin
+        GPIO.setup(PIR_PIN, GPIO.IN)
+        last_status = 'start_motion'
+
+        password = getpass.getpass()
+        send_text()
+        send_ifttt()
+        print "PIR Module Test (CTRL+C to exit)"
+        time.sleep(2)
+        print "Ready"
+
+        GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=motion_detected, bouncetime=200)
+
+        while 1:
+            time.sleep(appSettings.Settings.mainThreadSleep)
+
+    except KeyboardInterrupt:
+        print "Quit"
+        GPIO.cleanup()
