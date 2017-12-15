@@ -1,7 +1,6 @@
 import ConfigParser
 
 class AppConfig:
-    SETTINGS_KEY = 'Settings'
 
     def __init__(self):
         self.EmailSettings = None
@@ -55,11 +54,11 @@ class Settings:
 
     def __init__(self, config):
         self.config = config
-        self.elapsedTime = None
+        self.elapsedTimeSeconds = None
         self.pirPin = None
-        self.mainThreadSleep = None
+        self.mainThreadSleepSeconds = None
 
     def get_configuration(self):
-        self.elapsedTime = self.config.getint(self.SETTINGS_KEY, 'elapsed_time')
+        self.elapsedTimeSeconds = self.config.getint(self.SETTINGS_KEY, 'elapsed_time_seconds')
         self.pirPin = self.config.getint(self.SETTINGS_KEY, 'pir_pin')
-        self.mainThreadSleep = self.config.getint(self.SETTINGS_KEY, 'main_thread_sleep')
+        self.mainThreadSleepSeconds = self.config.getint(self.SETTINGS_KEY, 'main_thread_sleep_seconds')

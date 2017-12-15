@@ -1,8 +1,8 @@
-import time
-import datetime
 import smtplib
 import getpass
 import requests
+import datetime
+import time
 from AppConfig import AppConfig
 try:
     import RPi.GPIO as GPIO
@@ -17,8 +17,6 @@ def send_text():
     from_address = appSettings.EmailSettings.fromEmail
     toaddrs = appSettings.EmailSettings.toAddress
     msg = "\r\n".join([
-        "From: homeautomation.garrison@gmail.com",
-        "To: {0}".format(appSettings.EmailSettings.toAddress),
         "Subject: Motion Detected",
         "",
         "http://www.ustream.tv/channel/rpi-cam"
@@ -35,56 +33,56 @@ def send_text():
 def send_ifttt():
     global appSettings
     print 'Making request to IFTTT'
-    r = requests.get('https://maker.ifttt.com/trigger/motion_detected/with/key/{0}'.format(appSettings.IFTTT.key))
-    print 'Response: ' + r.text
-
-
-def motion_detected(pin):
-    global start_time, last_status, appSettings
-
-    GPIO.remove_event_detect(pin)
-
-    if GPIO.input(pin):
-
-        print "Motion Detected @ " + str(datetime.datetime.now())
-        elapsed_time = time.time() - start_time
-        if elapsed_time > appSettings.Settings.elapsedTime:
-            print "Elapsed Time: " + str(elapsed_time)
-            send_text()
-            send_ifttt()
-        last_status = 'start_motion'
-    else:
-        if last_status != 'stop_motion':
-            last_status = 'stop_motion'
-            print "Motion Stopped @ " + str(datetime.datetime.now())
-            start_time = time.time()
-
-    GPIO.add_event_detect(pin, GPIO.RISING, callback=motion_detected, bouncetime=200)
+    try:
+        r = requests.get('https://maker.ifttt.com/trigger/motion_detected/with/key/{0}'.format(appSettings.IFTTT.key))
+        print 'Response: ' + r.text
+    except:
+        print("Unexpected error calling IFTTT: ", sys.exc_info()[0])
+        raise
 
 
 if __name__ == '__main__':
     try:
 
+        # Get Configuration
         appSettings = AppConfig()
         appSettings.get_configuration()
 
-        start_time = time.time()
+        # Initialize variables
+        last_status_time = datetime.datetime.now() - datetime.timedelta(seconds=appSettings.Settings.elapsedTimeSeconds)
         GPIO.setmode(GPIO.BOARD)
         PIR_PIN = appSettings.Settings.pirPin
         GPIO.setup(PIR_PIN, GPIO.IN)
-        last_status = 'start_motion'
 
+        # Get user password for email account
         password = getpass.getpass()
+
+        # Send notifications to verify everything is working
         send_text()
         send_ifttt()
         print "PIR Module Test (CTRL+C to exit)"
         time.sleep(2)
         print "Ready"
 
-        GPIO.add_event_detect(PIR_PIN, GPIO.RISING, callback=motion_detected, bouncetime=200)
+        # Start listening for events
+        GPIO.add_event_detect(PIR_PIN, GPIO.RISING)
 
-        while 1:
-            time.sleep(appSettings.Settings.mainThreadSleep)
+        while True:
+
+            current_status_time = datetime.datetime.now()
+
+            if GPIO.event_detected(PIR_PIN):
+                elapsed_time = current_status_time - last_status_time
+
+                print("{0} - Event detected on pin {1} - last event fired {2}".format(current_status_time, PIR_PIN, elapsed_time))
+
+                last_status_time = datetime.datetime.now()
+                if elapsed_time.total_seconds() > appSettings.Settings.elapsedTimeSeconds:
+                    send_ifttt()
+                    send_text()
+            
+            #print("sleeping... elapsed time seconds: {0}".format((current_status_time-last_status_time).total_seconds()))
+            time.sleep(appSettings.Settings.mainThreadSleepSeconds)
 
     except KeyboardInterrupt:
         print "Quit"
