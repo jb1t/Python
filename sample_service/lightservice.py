@@ -72,7 +72,7 @@ for x in range(gpio_start, gpio_end):
 
 request = CancellationToken()
 # Loop forever, doing something useful hopefully:
-while True and not request.cancel_now:
+while not request.cancel_now:
 	logger.info("The counter is now " + str(i))
 	print "This is a test print"
 	i += 1
