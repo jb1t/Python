@@ -15,7 +15,7 @@ class Test_LightProvider(unittest.TestCase):
         lp.setupGPIO()
 
         self.assertTrue(mockGPIO.output.called)
-        mockGPIO.setmode.assert_any_call(mockGPIO.BOARD)
+        mockGPIO.setmode.assert_any_call(mockGPIO.BCM)
         mockGPIO.setup.assert_any_call(LightProvider.RED_PIN(), mockGPIO.OUT)
         mockGPIO.setup.assert_any_call(LightProvider.GREEN_PIN(), mockGPIO.OUT)
         mockGPIO.setup.assert_any_call(LightProvider.YELLOW_PIN(), mockGPIO.OUT)
