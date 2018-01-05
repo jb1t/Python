@@ -11,7 +11,7 @@ import os
 import functools
 from StopWatch import Stopwatch
 from datetime import datetime
-import reprlib
+import repr      #reprlib is for Python3.*
 import logging
 
 
@@ -19,13 +19,14 @@ class StopWatchLogger:
     def __init__(self, outputFolder='output', loggerName = None):
         self.outputFolder = outputFolder
         self.loggerName = loggerName
-        self.r = reprlib.Repr()
+        self.r = repr.Repr()
         self.r.maxlist = 4       # max elements displayed for lists
-        self.r.maxstring = 10    # max characters displayed for strings
+        self.r.maxstring = 30    # max characters displayed for strings
         
+        if not os.path.exists(self.outputFolder):
+            os.makedirs(self.outputFolder)
+
         if(self.loggerName is None):
-            if not os.path.exists(self.outputFolder):
-                os.makedirs(self.outputFolder)
             self.dir_path = os.path.realpath(os.curdir)
         else:
             self.logger = logging.getLogger(self.loggerName)
