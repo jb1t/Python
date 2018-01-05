@@ -16,7 +16,7 @@ import logging
 
 
 class StopWatchLogger:
-    def __init__(self, outputFolder='output', loggerName = None):
+    def __init__(self, outputFolder='logs', loggerName = None):
         self.outputFolder = outputFolder
         self.loggerName = loggerName
         self.r = repr.Repr()
