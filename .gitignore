@@ -168,3 +168,4 @@ pip-log.txt
 .DS_Store
 
 output/
+logs/
