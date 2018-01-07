@@ -20,6 +20,7 @@ class TCBuildLights:
         self.teamCity = teamCity
         self.timevalidator = timevalidator
         self.isDisplayTime = False
+        self.oldStatus = None
 
     def getStatusToDisplay(self):
 
@@ -60,8 +61,11 @@ class TCBuildLights:
         if self.isDisplayTime:
             try:
                 status = self.getStatusToDisplay()
-                self.lights.clearPins()
-                self.lights.lightPin(self.getPinToLightUp(status))
+                print("{0} current status, {1} old status".format(status, self.oldStatus))
+                if status <> self.oldStatus:
+                    self.oldStatus = status
+                    self.lights.clearPins()
+                    self.lights.lightPin(self.getPinToLightUp(status))
             except KeyboardInterrupt:
                 self.lights.cleanup()
             except:

@@ -16,7 +16,7 @@ class TeamCityProvider:
     def getTeamCityProjects(self):
         response = self.getprojectxml()
 
-        doc = xmltodict.parse(response)
+        doc = xmltodict.parse(response.content)
         projects = []
 
         for project in doc['Projects']['Project']:

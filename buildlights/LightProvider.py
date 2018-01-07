@@ -8,7 +8,7 @@ except ImportError:
 class LightProvider:
     @staticmethod
     def GREEN_PIN():
-        return 2
+        return 4 
 
     @staticmethod
     def YELLOW_PIN():
@@ -16,16 +16,16 @@ class LightProvider:
 
     @staticmethod
     def RED_PIN():
-        return 4
+        return 2 
 
     def __init__(self, GPIO):
         self.GPIO = GPIO
 
     def clearPins(self):
         print 'set all lights off'
-        self.GPIO.output(LightProvider.GREEN_PIN(), self.GPIO.LOW)
-        self.GPIO.output(LightProvider.YELLOW_PIN(), self.GPIO.LOW)
-        self.GPIO.output(LightProvider.RED_PIN(), self.GPIO.LOW)
+        self.GPIO.output(LightProvider.GREEN_PIN(), self.GPIO.HIGH)
+        self.GPIO.output(LightProvider.YELLOW_PIN(), self.GPIO.HIGH)
+        self.GPIO.output(LightProvider.RED_PIN(), self.GPIO.HIGH)
 
     def setupGPIO(self):
         print 'setup the GPIO'
@@ -41,4 +41,4 @@ class LightProvider:
 
     def lightPin(self, pin):
         print 'turn on pin', pin
-        self.GPIO.output(pin, self.GPIO.HIGH)
+        self.GPIO.output(pin, self.GPIO.LOW)

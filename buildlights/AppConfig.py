@@ -7,6 +7,8 @@ class AppConfig():
         self.datetime = None
         self.weholidays = None
         self.tc_url = None
+        self.uselocalfile = False
+        self.localfile = None
         self.getconfiguration()
 
     def getUseLocalFile(self):
