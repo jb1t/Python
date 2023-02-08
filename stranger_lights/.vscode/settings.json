@@ -1,0 +1,4 @@
+{
+    "azure-iot-toolkit.iotHubConnectionString": "HostName=fsn-stranger-lights-hub.azure-devices.net;DeviceId=prototype-pi;SharedAccessKey=reQCaTf0pbfnpmUJXWb9sQrW/tA3Fny5a/YW1PQdgl8=",
+    "azure-iot-toolkit.deviceConnectionString": "HostName=fsn-stranger-lights-hub.azure-devices.net;DeviceId=prototype-pi;SharedAccessKey=reQCaTf0pbfnpmUJXWb9sQrW/tA3Fny5a/YW1PQdgl8="
+}
